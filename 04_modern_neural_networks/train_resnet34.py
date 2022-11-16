@@ -6,8 +6,7 @@ os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 os.environ["TF_XLA_FLAGS"] = "--tf_xla_auto_jit=2"
 
 import tensorflow as tf
-
-
+import matplotlib.pyplot as plt
 
 #########################################################################
 # Here's the Residual layer from the first half again:
@@ -226,6 +225,8 @@ def train_epoch(i_epoch, step_in_epoch, train_ds, val_ds, network, optimizer, BA
     steps_validation = int(50000 / BATCH_SIZE)
 
     start = time.time()
+    epoch_losses = []
+    epoch_accs = []
     for train_images, train_labels in train_ds.take(steps_per_epoch):
         if step_in_epoch > steps_per_epoch: break
         else: step_in_epoch.assign_add(1)
@@ -235,6 +236,8 @@ def train_epoch(i_epoch, step_in_epoch, train_ds, val_ds, network, optimizer, BA
         end = time.time()
         images_per_second = BATCH_SIZE / (end - start)
         print(f"Finished step {step_in_epoch.numpy()} of {steps_per_epoch} in epoch {i_epoch.numpy()},loss={loss:.3f}, acc={acc:.3f} ({images_per_second:.3f} img/s).")
+        epoch_losses.append(loss)
+        epoch_accs.append(acc * 100)
         start = time.time()
 
     # Save the network after every epoch:
@@ -253,6 +256,16 @@ def train_epoch(i_epoch, step_in_epoch, train_ds, val_ds, network, optimizer, BA
     mean_accuracy /= steps_validation
 
     print(f"Validation accuracy after epoch {i_epoch.numpy()}: {mean_accuracy:.4f}.")
+    iters = list(range(len(epoch_losses)))
+    plt.plot(iters, epoch_losses)
+    plt.xlabel("Iteration")
+    plt.ylabel("Loss")
+    plt.savefig(f"epoch{i_epoch}_loss.png")
+
+    plt.plot(iters, epoch_accs)
+    plt.xlabel("Iteration")
+    plt.ylabel("Accuracy [%]")
+    plt.savefig(f"epoch{i_epoch}_accuracy.png")
 
 
 
@@ -300,7 +313,7 @@ def main():
     # Here's some configuration:
     #########################################################################
     BATCH_SIZE = 256
-    N_EPOCHS = 10
+    N_EPOCHS = 1
 
     train_ds, val_ds = prepare_data_loader(BATCH_SIZE)
 
