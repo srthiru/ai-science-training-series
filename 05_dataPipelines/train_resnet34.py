@@ -7,7 +7,7 @@ os.environ["TF_XLA_FLAGS"] = "--tf_xla_auto_jit=2"
 # This control parallelism in Tensorflow
 parallel_threads = 128
 # This controls how many batches to prefetch
-prefetch_buffer_size = 8 # tf.data.AUTOTUNE
+prefetch_buffer_size = 8 # tf.data.AUTOTUNE; 1, 2, 4, 8
 os.environ['OMP_NUM_THREADS'] = str(parallel_threads)
 num_parallel_readers = parallel_threads
 
